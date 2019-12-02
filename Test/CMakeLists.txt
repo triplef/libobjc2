@@ -26,6 +26,7 @@ set(TESTS
 	ConstantString.m
 	Category.m
 	ExceptionTest.m
+	ExceptionTest_arc.m
 	FastARC.m
 	Forward.m
 	ManyManySelectors.m
@@ -56,6 +57,13 @@ set(TESTS
 	hash_test.c
 	setSuperclass.m
 )
+
+if (ENABLE_OBJCXX)
+	list(APPEND TESTS
+	ExceptionTestObjCXX.mm
+	ExceptionTestObjCXX_arc.mm
+	)
+endif()
 
 if (WIN32)
 else ()
