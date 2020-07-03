@@ -1,8 +1,8 @@
 jobs:
   - job: Linux
-    displayName: Ubuntu-16.04
+    displayName: Ubuntu-18.04
     pool:
-      vmImage: ubuntu-16.04
+      vmImage: ubuntu-18.04
     container: glaux/clang-azure-devops:latest
     strategy:
       matrix:
@@ -49,11 +49,15 @@ jobs:
       displayName: 'Compile'
 
     - script: |
-        ctest -j 4 --output-on-failure
+        ctest -j 4 --output-on-failure -T test
 
       displayName: 'Test'
       workingDirectory: build
-      failOnStderr: true
+      failOnStderr: false
+    - task: PublishTestResults@2
+      inputs:
+          testResultsFormat: cTest
+          testResultsFiles: build/Testing/*/Test.xml
   - job: Windows
     displayName: Windows-2016
     pool:
@@ -118,10 +122,12 @@ jobs:
         cd build
         echo Copying objc.dll into Test directory...
         copy /y objc.dll Test
-        echo Running CTest...
-        ctest -j 4 --output-on-failure
-        echo CTest completed.
+        ctest -j 4 --output-on-failure -T test
 
-
-      failOnStderr: true
+      failOnStderr: false
       displayName: 'Test'
+
+    - task: PublishTestResults@2
+      inputs:
+          testResultsFormat: cTest
+          testResultsFiles: build/Testing/*/Test.xml

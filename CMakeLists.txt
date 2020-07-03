@@ -84,7 +84,6 @@ if (WIN32)
 	list(APPEND libobjc_CXX_SRCS eh_win32_msvc.cc)
 else ()
 	list(APPEND libobjc_C_SRCS eh_personality.c)
-	set(libobjcxx_CXX_SRCS objcxx_eh.cc libstdcxx_current_primary_exception.cc)
 endif (WIN32)
 
 
@@ -141,6 +140,13 @@ set(OLDABI_COMPAT ${OLD_ABI_COMPAT_DEFAULT} CACHE BOOL
 
 set(LEGACY_COMPAT FALSE CACHE BOOL
 	"Enable legacy compatibility features")
+
+set(DEBUG_ARC_COMPAT FALSE CACHE BOOL
+	"Log warnings for classes that don't hit ARC fast paths")
+
+if (DEBUG_ARC_COMPAT)
+	add_definitions(-DDEBUG_ARC_COMPAT)
+endif()
 
 if (OLDABI_COMPAT)
 	list(APPEND libobjc_C_SRCS legacy.c abi_version.c statics_loader.c)
@@ -264,7 +270,6 @@ if (MSVC)
 endif()
 
 
-add_library(objc SHARED ${libobjc_C_SRCS} ${libobjc_ASM_SRCS} ${libobjc_OBJC_SRCS} ${libobjc_OBJCXX_SRCS} ${libobjc_ASM_OBJS})
 
 if (ENABLE_OBJCXX)
 	if (WIN32)
@@ -330,9 +335,15 @@ if (ENABLE_OBJCXX)
 			endif()
 		endif ()
 		add_definitions( -DCXX_ABI_IS_GNU=${CXX_ABI_IS_GNU})
+		add_custom_command(OUTPUT eh_trampoline.s
+			COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -fPIC -S "${CMAKE_SOURCE_DIR}/eh_trampoline.cc" -o - -fexceptions -fno-inline | sed "s/__gxx_personality_v0/test_eh_personality/g" > "${CMAKE_BINARY_DIR}/eh_trampoline.s"
+			MAIN_DEPENDENCY eh_trampoline.cc)
+		list(APPEND libobjc_ASM_SRCS eh_trampoline.s)
+		list(APPEND libobjc_CXX_SRCS objcxx_eh.cc)
 	endif ()
 endif (ENABLE_OBJCXX)
 
+add_library(objc SHARED ${libobjc_C_SRCS} ${libobjc_ASM_SRCS} ${libobjc_OBJC_SRCS} ${libobjc_OBJCXX_SRCS} ${libobjc_ASM_OBJS})
 
 if (ENABLE_OBJCXX)
 	if (NOT CXXRT_IS_STDLIB)
@@ -343,6 +354,8 @@ if (ENABLE_OBJCXX)
 	endif()
 	list(APPEND libobjc_CXX_SRCS ${libobjcxx_CXX_SRCS})
 	target_sources(objc PRIVATE ${libobjc_CXX_SRCS})
+else()
+	add_definitions(-DNO_OBJCXX)
 endif()
 
 

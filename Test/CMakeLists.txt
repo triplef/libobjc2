@@ -26,6 +26,7 @@ set(TESTS
 	ConstantString.m
 	Category.m
 	ExceptionTest.m
+	FastARC.m
 	Forward.m
 	ManyManySelectors.m
 	NestedExceptions.m
@@ -36,6 +37,7 @@ set(TESTS
 	ProtocolCreation.m
 	ResurrectInDealloc_arc.m
 	RuntimeTest.m
+	SuperMethodMissing.m
 	WeakBlock_arc.m
 	WeakRefLoad.m
 	WeakReferences_arc.m
