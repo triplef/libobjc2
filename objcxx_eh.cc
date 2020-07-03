@@ -81,7 +81,7 @@ namespace
 inline _Unwind_Reason_Code continueUnwinding(struct _Unwind_Exception *ex,
                                                     struct _Unwind_Context *context)
 {
-#if defined(__arm__) && !defined(__ARM_DWARF_EH__)
+#if defined(__arm__) && !defined(__ARM_DWARF_EH__) && CXX_ABI_IS_GNU == 1
 	if (__gnu_unwind_frame(ex, context) != _URC_OK) { return _URC_FAILURE; }
 #endif
 	return _URC_CONTINUE_UNWIND;
